@@ -2,10 +2,8 @@
 	import { Check, ChevronRight } from "lucide-svelte"
 
 	interface BreadcrumbMenuProps {
-		/** Nombre accesible del botón, p. ej. «Cambiar de banco». */
 		label: string
 		items: { label: string; href: string; current?: boolean }[]
-		/** Texto cuando `items` está vacío. */
 		empty?: string
 		disabled?: boolean
 	}
