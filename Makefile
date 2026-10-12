@@ -17,7 +17,7 @@ args ?=
 docker_tty ?= -it
 
 .DEFAULT_GOAL := run
-.PHONY: run detach clean fmt lint migration machete clean-db db npmi npmu npmci setup deployer down
+.PHONY: run detach clean fmt lint migration machete clean-db db npmi npmu npmci setup deployer down spell
 
 setup:
 	rm -rf $(CLIENT)/node_modules
@@ -52,6 +52,9 @@ lint:
 	cargo clippy --workspace --all-targets --all-features -- -D warnings
 	cd $(CLIENT) && corepack pnpm run lint
 	cd $(CLIENT) && corepack pnpm run check
+
+spell:
+	corepack pnpm --package=cspell --package=@cspell/dict-es-es dlx cspell lint --no-progress "$(CLIENT)/src/**/*.{svelte,ts,css}"
 
 migration:
 	cd $(SERVER) && sqlx migrate add --source ./config/migrations "$(name)"
