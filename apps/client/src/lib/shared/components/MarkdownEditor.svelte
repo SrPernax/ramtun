@@ -37,7 +37,7 @@
 			{#if value}
 				<Markdown content={value} />
 			{:else}
-				<p class="m-0 text-sm text-zinc-500">Sin contenido para previsualizar.</p>
+				<p class="m-0 text-sm text-zinc-500">Escribe algo para ver la vista previa.</p>
 			{/if}
 		</div>
 	{/if}

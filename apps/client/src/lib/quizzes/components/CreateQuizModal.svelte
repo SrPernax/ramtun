@@ -304,7 +304,7 @@
 					<div class="grid gap-3">
 						<div class="flex items-center justify-between">
 							<span class="text-sm text-zinc-800">Tabla de certeza</span>
-							<span class="text-xs text-zinc-500">Puntaje por respuesta</span>
+							<span class="text-xs text-zinc-500">Puntos por respuesta</span>
 						</div>
 						<div class="overflow-x-auto rounded-[4px] border border-zinc-200">
 							<table class="w-full border-collapse text-xs">

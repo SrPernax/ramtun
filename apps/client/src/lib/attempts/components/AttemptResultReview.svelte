@@ -72,7 +72,7 @@
 		</div>
 		<div class="panel-muted p-3 sm:p-4">
 			<p class="m-0 flex items-center gap-2 text-xs font-medium text-zinc-700">
-				<ChartColumn size={13} /> Puntaje
+				<ChartColumn size={13} /> Puntos
 			</p>
 			<p class="mt-1 mb-0 text-lg font-semibold text-black">
 				{result.score} / {result.maxScore}
