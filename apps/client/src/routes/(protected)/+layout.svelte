@@ -82,13 +82,18 @@
 			</h1>
 		</div>
 
-		<nav class="flex items-center gap-3 sm:gap-4 lg:gap-6" aria-label="Principal">
-			<a class="text-tab" data-active={isActive("/join")} href="/join" title="Unirse">
+		<nav class="flex items-center gap-1 sm:gap-2 lg:gap-6" aria-label="Principal">
+			<a
+				class="text-tab min-h-11 min-w-11 justify-center lg:min-w-0"
+				data-active={isActive("/join")}
+				href="/join"
+				title="Unirse"
+			>
 				<DoorOpen size={16} aria-hidden="true" />
 				<span class="hidden lg:inline">Unirse</span>
 			</a>
 			<a
-				class="text-tab"
+				class="text-tab min-h-11 min-w-11 justify-center lg:min-w-0"
 				data-active={isActive("/results")}
 				href="/results"
 				title="Resultados"
@@ -98,7 +103,7 @@
 			</a>
 			{#if showCoursesNav}
 				<a
-					class="text-tab"
+					class="text-tab min-h-11 min-w-11 justify-center lg:min-w-0"
 					data-active={isActive("/courses")}
 					href="/courses"
 					title="Cursos"
@@ -117,7 +122,7 @@
 				<p class="m-0 text-xs text-zinc-600">{authStore.user?.role.toDisplay()}</p>
 			</div>
 			<button
-				class="btn-close cursor-pointer"
+				class="btn-close size-11 cursor-pointer"
 				type="button"
 				onclick={handleLogout}
 				title="Cerrar sesión"
