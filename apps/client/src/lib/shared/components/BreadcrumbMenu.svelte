@@ -2,7 +2,7 @@
 	import { Check, ChevronRight } from "lucide-svelte"
 
 	interface BreadcrumbMenuProps {
-		/** Nombre accesible del menú, p. ej. «Bancos de preguntas». */
+		/** Nombre accesible del botón, p. ej. «Cambiar de banco». */
 		label: string
 		items: { label: string; href: string; current?: boolean }[]
 		/** Texto cuando `items` está vacío. */
@@ -35,7 +35,6 @@
 		class="flex size-6 cursor-pointer items-center justify-center rounded-[4px] text-zinc-500 hover:bg-zinc-200 hover:text-black disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-zinc-500"
 		type="button"
 		aria-label={label}
-		aria-haspopup="menu"
 		aria-expanded={open}
 		{disabled}
 		onclick={() => (open = !open)}
@@ -50,15 +49,13 @@
 	{#if open}
 		<ul
 			class="panel-elevated absolute top-full left-0 z-20 m-0 mt-1.5 max-h-72 w-72 max-w-[80vw] list-none overflow-y-auto p-1"
-			role="menu"
 			aria-label={label}
 		>
 			{#each items as item (item.href)}
-				<li role="none">
+				<li>
 					<a
 						class="row-hover flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-sm text-zinc-800 hover:text-black"
 						class:font-medium={item.current}
-						role="menuitem"
 						href={item.href}
 						aria-current={item.current ? "page" : undefined}
 						onclick={() => (open = false)}
@@ -70,7 +67,7 @@
 					</a>
 				</li>
 			{:else}
-				<li class="px-2.5 py-2 text-sm text-zinc-600" role="none">{empty}</li>
+				<li class="px-2.5 py-2 text-sm text-zinc-600">{empty}</li>
 			{/each}
 		</ul>
 	{/if}

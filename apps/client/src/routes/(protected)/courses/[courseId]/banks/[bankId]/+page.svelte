@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useQuery, useMutation, useQueryClient } from "$lib/shared/http/tanstack"
 	import { FileDown, Pencil, Save, X } from "lucide-svelte"
+	import { page } from "$app/state"
 	import { resolve } from "$app/paths"
 	import { courseSections } from "$lib/courses/sections"
 	import { toast } from "svelte-sonner"
@@ -30,7 +31,7 @@
 		courseSections(data.courseId).map(({ label, href, isActive }) => ({
 			label,
 			href,
-			current: isActive(`/courses/${data.courseId}/banks`),
+			current: isActive(page.url.pathname),
 		}))
 	)
 
@@ -103,7 +104,7 @@
 					{data.course.name}
 				</a>
 				<BreadcrumbMenu
-					label="Secciones del curso"
+					label="Cambiar de sección"
 					items={sectionItems}
 					disabled={editing}
 				/>
@@ -114,7 +115,7 @@
 					Bancos de preguntas
 				</a>
 				<BreadcrumbMenu
-					label="Bancos de preguntas"
+					label="Cambiar de banco"
 					items={bankItems}
 					empty={banksQuery.isLoading ? "Cargando bancos..." : "Sin bancos"}
 					disabled={editing}
