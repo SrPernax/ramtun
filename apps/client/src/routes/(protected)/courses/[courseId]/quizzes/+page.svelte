@@ -74,7 +74,7 @@
 	<header>
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div>
-				<h3 class="mt-2 mb-0 text-xl text-black">Cuestionarios</h3>
+				<h3 class="sr-only">Cuestionarios</h3>
 				<p class="m-0 mt-2 text-sm text-zinc-700">
 					Programa evaluaciones, monitorea su estado y publica resultados cuando
 					corresponda.

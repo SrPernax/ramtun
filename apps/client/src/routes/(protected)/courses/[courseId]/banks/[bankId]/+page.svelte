@@ -1,27 +1,47 @@
 <script lang="ts">
 	import { useQuery, useMutation, useQueryClient } from "$lib/shared/http/tanstack"
-	import { ArrowLeft, FileDown, Pencil, Save, X } from "lucide-svelte"
+	import { FileDown, Pencil, Save, X } from "lucide-svelte"
+	import { page } from "$app/state"
 	import { resolve } from "$app/paths"
+	import { courseSections } from "$lib/courses/sections"
 	import { toast } from "svelte-sonner"
 	import { banksService } from "$lib/banks/banks.service"
 	import { exportBankMarkdown } from "$lib/banks/utils"
-	import { coursesService } from "$lib/courses/service"
+	import BreadcrumbMenu from "$lib/shared/components/BreadcrumbMenu.svelte"
 	import Markdown from "$lib/shared/components/Markdown.svelte"
 	import MarkdownEditor from "$lib/shared/components/MarkdownEditor.svelte"
+	import Title from "$lib/shared/components/Title.svelte"
 
 	let { data } = $props()
 
 	const queryClient = useQueryClient()
 
-	const courseQuery = useQuery(() => ({
-		queryKey: ["course", data.courseId],
-		queryFn: () => coursesService.findOne(data.courseId),
-	}))
-
 	const bankQuery = useQuery(() => ({
 		queryKey: ["bank", data.bankId],
 		queryFn: () => banksService.getById(data.bankId),
 	}))
+
+	// Misma clave que la lista de bancos: comparte caché con `/banks`.
+	const banksQuery = useQuery(() => ({
+		queryKey: ["banks", data.courseId],
+		queryFn: () => banksService.listByCourse(data.courseId),
+	}))
+
+	const sectionItems = $derived(
+		courseSections(data.courseId).map(({ label, href, isActive }) => ({
+			label,
+			href,
+			current: isActive(page.url.pathname),
+		}))
+	)
+
+	const bankItems = $derived(
+		(banksQuery.data ?? []).map((bank) => ({
+			label: bank.name,
+			href: `/courses/${data.courseId}/banks/${bank.id}`,
+			current: bank.id === data.bankId,
+		}))
+	)
 
 	type DraftQuestion = {
 		prompt: string
@@ -71,27 +91,50 @@
 </script>
 
 <section class="grid gap-4">
-	<header class="flex flex-wrap items-start justify-between gap-3">
-		<div>
-			<h3 class="mt-2 mb-0 text-xl text-black">
-				{courseQuery.data?.name ?? "Curso"} - {bankQuery.data?.name ?? "Banco"}
-			</h3>
-			<p class="m-0 mt-2 text-sm text-zinc-700">
-				{bankQuery.data?.questions.length ?? 0} preguntas
-				{#if editing}
-					- modo edición
-				{/if}
-			</p>
+	<header class="flex flex-wrap items-end justify-between gap-3">
+		<div class="min-w-0">
+			<nav
+				class="mb-1.5 flex min-w-0 flex-wrap items-center gap-y-0.5 text-sm text-zinc-600"
+				aria-label="Ubicación"
+			>
+				<a
+					class="shrink-0 hover:text-black"
+					href={resolve(`/courses/${data.courseId}/quizzes`)}
+				>
+					{data.course.name}
+				</a>
+				<BreadcrumbMenu
+					label="Cambiar de sección"
+					items={sectionItems}
+					disabled={editing}
+				/>
+				<a
+					class="shrink-0 hover:text-black"
+					href={resolve(`/courses/${data.courseId}/banks`)}
+				>
+					Bancos de preguntas
+				</a>
+				<BreadcrumbMenu
+					label="Cambiar de banco"
+					items={bankItems}
+					empty={banksQuery.isLoading ? "Cargando bancos..." : "Sin bancos"}
+					disabled={editing}
+				/>
+				<span class="min-w-0 truncate text-black" aria-current="page">
+					{bankQuery.data?.name ?? "Banco"}
+				</span>
+			</nav>
+			<div class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+				<Title size="page">{bankQuery.data?.name ?? "Banco"}</Title>
+				<p class="m-0 text-sm text-zinc-700">
+					{bankQuery.data?.questions.length ?? 0} preguntas
+					{#if editing}
+						- modo edición
+					{/if}
+				</p>
+			</div>
 		</div>
 		<div class="flex flex-wrap items-center gap-1.5">
-			<a
-				class="btn-secondary flex items-center gap-1.5"
-				href={resolve(`/courses/${data.courseId}/banks`)}
-			>
-				<ArrowLeft size={16} aria-hidden="true" />
-				Volver a Bancos de preguntas
-			</a>
-
 			{#if editing}
 				<button
 					class="btn-secondary flex items-center gap-1.5"

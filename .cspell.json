@@ -1,0 +1,19 @@
+{
+  "import": ["@cspell/dict-es-es/cspell-ext.json"],
+  "language": "en,es",
+  "words": [
+    "Berlín",
+    "dtos",
+    "fgutierrez",
+    "formisch",
+    "katex",
+    "keyline",
+    "Londres",
+    "onnavigate",
+    "picklist",
+    "ramtun",
+    "subpage",
+    "tailwindcss",
+    "unsub"
+  ]
+}

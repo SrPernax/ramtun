@@ -57,7 +57,7 @@
 	<header>
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div>
-				<h3 class="mt-2 mb-0 text-xl text-black">Bancos de preguntas</h3>
+				<h3 class="sr-only">Bancos de preguntas</h3>
 				<p class="m-0 mt-2 text-sm text-zinc-700">
 					Sube y gestiona bancos de preguntas en formato JSON.
 				</p>
