@@ -73,16 +73,16 @@
 
 <main class="mx-auto flex min-h-dvh max-w-312 flex-col gap-2 p-3 sm:p-4 lg:p-6">
 	<header
-		class="flex items-baseline-last justify-between gap-2 px-1 pb-2 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-4 sm:px-4 lg:gap-8"
+		class="panel-elevated mx-auto flex w-full items-center justify-between gap-2 px-2 py-2 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:gap-4 sm:px-8 sm:py-3.5 lg:gap-8"
 	>
-		<div class="shrink-0">
+		<div class="min-w-0">
 			<p class="m-0 text-xs font-semibold tracking-widest text-zinc-500">INF-UCT: RAMTUN</p>
-			<h1 class="mt-0.5 mb-0 text-lg leading-tight text-black sm:text-2xl">
+			<h1 class="mt-0.5 mb-0 text-base leading-tight text-black sm:text-2xl">
 				Cuestionarios en línea
 			</h1>
 		</div>
 
-		<nav class="flex items-center gap-1 sm:gap-2 lg:gap-6" aria-label="Principal">
+		<nav class="flex items-center sm:gap-2 lg:gap-6" aria-label="Principal">
 			<a
 				class="text-tab min-h-11 min-w-11 justify-center lg:min-w-0"
 				data-active={isActive("/join")}
