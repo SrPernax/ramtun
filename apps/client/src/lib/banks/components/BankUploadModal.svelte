@@ -11,7 +11,7 @@
 	import { toast } from "svelte-sonner"
 	import { Upload, Code, X } from "lucide-svelte"
 	import { bankQuestionsSchema } from "$lib/banks/banks.dtos"
-	import { createForm, Field, Form, reset, setInput } from "@formisch/svelte"
+	import { createForm, Field, Form, getInput, reset, setInput } from "@formisch/svelte"
 	import { inlineTryAsync } from "$lib/shared/try"
 	import { fileNameWithoutExtension, parseBankMarkdown } from "$lib/banks/markdown"
 
@@ -67,6 +67,7 @@ print("hola")
 
 	const handleFileChange = async (e: Event) => {
 		const file = (e.target as HTMLInputElement).files?.[0] ?? null
+		const replacesFile = selectedFile !== null
 		selectedFile = file
 		fileError = null
 		parsedQuestions = []
@@ -90,7 +91,10 @@ print("hola")
 		}
 
 		parsedQuestions = result.output
-		setInput(form, { path: ["name"], input: parsed.name })
+		// El archivo propone el nombre; un nombre escrito antes del primer archivo se respeta.
+		if (replacesFile || !getInput(form, { path: ["name"] })) {
+			setInput(form, { path: ["name"], input: parsed.name })
+		}
 	}
 
 	const handleSubmit: SubmitEventHandler<typeof bankUploadFormSchema> = async (output) => {
@@ -189,9 +193,9 @@ print("hola")
 								{/if}
 							</div>
 
-							<div class="sticky-actions mt-">
+							<div class="flex gap-2">
 								<button
-									class="btn-primary flex w-full items-center gap-1.5 sm:w-auto"
+									class="btn-primary flex-1 gap-1.5"
 									type="submit"
 									disabled={mutation.isPending || !selectedFile || !!fileError}
 								>
@@ -199,7 +203,7 @@ print("hola")
 									{mutation.isPending ? "Subiendo..." : "Subir banco"}
 								</button>
 								<button
-									class="btn-secondary flex w-full items-center gap-1.5 sm:w-auto"
+									class="btn-secondary flex-1 gap-1.5"
 									type="button"
 									onclick={() => (showFormatModal = true)}
 								>
