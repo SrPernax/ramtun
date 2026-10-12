@@ -7,7 +7,7 @@
 
 	const sections = $derived(courseSections(data.courseId))
 
-	// El detalle de un banco muestra sus migas en lugar del título y las pestañas del curso.
+	// El detalle de un banco muestra su breadcrumb en lugar del título y las pestañas del curso.
 	const isBankDetail = $derived(page.params.bankId !== undefined)
 </script>
 

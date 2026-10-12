@@ -29,7 +29,7 @@
 	}}
 />
 
-<!-- El separador de las migas es el disparador: abre las alternativas de ese nivel. -->
+<!-- El separador del breadcrumb es el disparador: abre las alternativas de ese nivel. -->
 <div class="relative mx-1 shrink-0" bind:this={root}>
 	<button
 		class="flex size-6 cursor-pointer items-center justify-center rounded-[4px] text-zinc-500 hover:bg-zinc-200 hover:text-black disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-zinc-500"

@@ -1,6 +1,6 @@
 import { FileText, Library, Users } from "lucide-svelte"
 
-/** Secciones de un curso: fuente única de las pestañas del curso y del menú de las migas. */
+/** Secciones de un curso: fuente única de las pestañas del curso y del menú del breadcrumb. */
 export const courseSections = (courseId: string) => {
 	const base = `/courses/${courseId}`
 
