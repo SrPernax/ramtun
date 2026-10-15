@@ -1,6 +1,6 @@
 use crate::courses::CourseId;
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
@@ -20,50 +20,6 @@ pub struct QuestionInput {
 	#[serde(default)]
 	#[validate(length(max = 5000, message = "Justification must be at most 5000 characters"))]
 	pub justification: Option<String>,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub enum PatchField<T> {
-	#[default]
-	Missing,
-	Clear,
-	Set(T),
-}
-
-impl<T> PatchField<T> {
-	fn is_missing(&self) -> bool {
-		matches!(self, Self::Missing)
-	}
-}
-
-impl<'de, T> Deserialize<'de> for PatchField<T>
-where
-	T: Deserialize<'de>,
-{
-	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-	where
-		D: Deserializer<'de>,
-	{
-		Option::<T>::deserialize(deserializer).map(|value| match value {
-			Some(value) => Self::Set(value),
-			None => Self::Clear,
-		})
-	}
-}
-
-impl<T> Serialize for PatchField<T>
-where
-	T: Serialize,
-{
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-	where
-		S: Serializer,
-	{
-		match self {
-			Self::Missing | Self::Clear => serializer.serialize_none(),
-			Self::Set(value) => value.serialize(serializer),
-		}
-	}
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
@@ -97,9 +53,14 @@ pub struct UpdateQuestionInput {
 
 	#[validate(length(min = 2, max = 5, message = "There must be between 2 and 5 options"))]
 	pub options: Vec<String>,
-	#[serde(default, skip_serializing_if = "PatchField::is_missing")]
-	#[validate(custom(function = "validate_justification_update"))]
-	pub justification: PatchField<String>,
+	/// `None` keeps the current justification, `Some(None)` clears it.
+	#[serde(
+		default,
+		with = "serde_with::rust::double_option",
+		skip_serializing_if = "Option::is_none"
+	)]
+	#[validate(length(max = 5000, message = "Justification must be at most 5000 characters"))]
+	pub justification: Option<Option<String>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
@@ -131,20 +92,6 @@ fn validate_question(question: &QuestionInput) -> Result<(), ValidationError> {
 	Err(err)
 }
 
-fn validate_justification_update(value: &PatchField<String>) -> Result<(), ValidationError> {
-	let PatchField::Set(text) = value else {
-		return Ok(());
-	};
-
-	if text.chars().count() <= 5000 {
-		return Ok(());
-	}
-
-	let mut err = ValidationError::new("length");
-	err.message = Some("Justification must be at most 5000 characters".into());
-	Err(err)
-}
-
 fn validate_update_has_fields(dto: &UpdateQuestionBankDto) -> Result<(), ValidationError> {
 	if dto.name.is_some() || dto.questions.is_some() {
 		return Ok(());
@@ -153,4 +100,41 @@ fn validate_update_has_fields(dto: &UpdateQuestionBankDto) -> Result<(), Validat
 	let mut err = ValidationError::new("empty_update");
 	err.message = Some("At least one field must be provided".into());
 	Err(err)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::UpdateQuestionInput;
+	use validator::Validate;
+
+	fn parse(json: &str) -> UpdateQuestionInput {
+		serde_json::from_str(json).expect("valid question payload")
+	}
+
+	#[test]
+	fn justification_distinguishes_missing_null_and_value() {
+		let base = r#""prompt": "P", "options": ["a", "b"]"#;
+
+		assert_eq!(parse(&format!("{{{base}}}")).justification, None);
+		assert_eq!(
+			parse(&format!(r#"{{{base}, "justification": null}}"#)).justification,
+			Some(None)
+		);
+		assert_eq!(
+			parse(&format!(r#"{{{base}, "justification": "J"}}"#)).justification,
+			Some(Some("J".to_owned()))
+		);
+	}
+
+	#[test]
+	fn justification_update_rejects_text_over_limit() {
+		let input = |len: usize| UpdateQuestionInput {
+			prompt: "P".to_owned(),
+			options: vec!["a".to_owned(), "b".to_owned()],
+			justification: Some(Some("x".repeat(len))),
+		};
+
+		assert!(input(5000).validate().is_ok());
+		assert!(input(5001).validate().is_err());
+	}
 }
