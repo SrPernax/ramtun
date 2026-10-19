@@ -254,6 +254,11 @@ body {
 		border-color: color-mix(in srgb, var(--line-strong) 90%, white);
 	}
 
+	.btn-sm {
+		@apply gap-1.5 px-2.5 py-1 text-[13px];
+		min-height: 32px;
+	}
+
 	.btn-close {
 		@apply inline-flex size-10 shrink-0 items-center justify-center rounded-[4px];
 		background: transparent;
@@ -273,6 +278,10 @@ body {
 	.segmented-item {
 		@apply inline-flex min-h-10 items-center gap-1.5 rounded-[2px] border border-transparent px-3 py-1.5 text-sm font-medium;
 		color: var(--ink-muted);
+	}
+
+	.segmented-sm .segmented-item {
+		@apply min-h-8 px-2.5 py-1 text-[13px];
 	}
 
 	.segmented-item[data-active="true"] {
