@@ -82,7 +82,7 @@
 				{#each question.options as _, optionIndex (optionIndex)}
 					<div class="flex items-center gap-2">
 						<input
-							class="size-4 shrink-0 accent-emerald-700"
+							class="[--check:var(--ok)]"
 							type="radio"
 							name={`correct-${question.key}`}
 							checked={question.answerIndex === optionIndex}
