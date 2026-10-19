@@ -135,9 +135,6 @@ impl QuestionBankService {
 		self.repository.save(&mut tx, &bank).await?;
 
 		if let Some(question_inputs) = input.questions {
-			let current = self.questions.list_current_by_bank(&bank.id).await?;
-			self.ensure_editable_payload(&current, &question_inputs)?;
-
 			self.questions
 				.archive_or_purge_generation(&mut tx, &bank.id)
 				.await?;
@@ -148,24 +145,15 @@ impl QuestionBankService {
 				.iter()
 				.enumerate()
 				.map(|(position, q)| {
-					let answer_index = current
-						.get(position)
-						.map(|question| question.answer_index)
-						.unwrap_or(0);
-					let justification = match &q.justification {
-						None => current
-							.get(position)
-							.and_then(|question| question.justification.clone()),
-						Some(value) => Self::normalize_justification(value.as_deref()),
-					};
-
 					Question::builder()
 						.bank_id(bank.id)
 						.position(position as i16)
 						.prompt(q.prompt.clone())
 						.options(q.options.clone())
-						.answer_index(answer_index)
-						.maybe_justification(justification)
+						.answer_index(q.answer_index as i16)
+						.maybe_justification(Self::normalize_justification(
+							q.justification.as_deref(),
+						))
 						.created_at(now)
 						.build()
 				})
@@ -267,27 +255,6 @@ impl QuestionBankService {
 		}
 
 		Err(QuestionBankError::InvalidQuestionCountAfterBankUpdate)?
-	}
-
-	/// Editing only changes prompt and option texts, so the number of questions
-	/// and the number of options of each question must stay unchanged. The
-	/// correct answer is preserved server-side by position.
-	fn ensure_editable_payload(
-		&self,
-		current: &[Question],
-		incoming: &[UpdateQuestionInput],
-	) -> AppResult<()> {
-		if current.len() != incoming.len() {
-			Err(QuestionBankError::QuestionCountMismatch)?;
-		}
-
-		for (index, question) in incoming.iter().enumerate() {
-			if current[index].options.len() != question.options.len() {
-				Err(QuestionBankError::OptionsCountMismatch)?;
-			}
-		}
-
-		Ok(())
 	}
 
 	/// Trims the justification and stores `None` when nothing is left, so blank

@@ -48,12 +48,12 @@
 
 ## PATCH `/banks/{bankId}`
 
-- Summary: Update bank name and/or question texts.
+- Summary: Rename the bank and/or replace its questions.
 - Auth: Bearer token required.
 - Roles (AuthzAction::BankUpdate): `admin`, `func`, `student`.
 - Path params:
     - `bankId: uuid`
-- Body (at least one field). Editing questions only accepts `prompt` and `options` texts; the correct answer (`answerIndex`) is preserved server-side by position and cannot be changed. The number of questions and options per question must match the current bank. `justification` is optional (Markdown/LaTeX, max 5000 characters): omitting it keeps the current value, `null` clears it, and a string replaces it; blank strings are stored as `null`.
+- Body (at least one field). `questions` replaces the whole list: each item carries `prompt`, `options` (2–5), `answerIndex` (index into `options`) and an optional `justification`, so the correct answer, the options and the number of questions can all change (1–500 questions). `justification` is Markdown/LaTeX, max 5000 characters; `null` or a blank string stores no justification.
 
 ```json
 {
@@ -62,6 +62,7 @@
 		{
 			"prompt": "Enunciado editado (soporta Markdown)",
 			"options": ["Opción A", "Opción B"],
+			"answerIndex": 1,
 			"justification": null
 		}
 	]
@@ -81,6 +82,6 @@
 
 ## Common Domain Errors
 
-- `409`: locked by running quiz or invalid question count after bank update sync.
+- `409`: locked by a running quiz, or the new question count leaves a not-started linked quiz without enough questions.
 - `404`: bank not found.
 - `400`: invalid question payload.

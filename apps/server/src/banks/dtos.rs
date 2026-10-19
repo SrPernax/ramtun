@@ -43,28 +43,6 @@ pub struct CreateQuestionBankDto {
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
-pub struct UpdateQuestionInput {
-	#[validate(length(
-		min = 1,
-		max = 5000,
-		message = "Prompt must be between 1 and 5000 characters"
-	))]
-	pub prompt: String,
-
-	#[validate(length(min = 2, max = 5, message = "There must be between 2 and 5 options"))]
-	pub options: Vec<String>,
-	/// `None` keeps the current justification, `Some(None)` clears it.
-	#[serde(
-		default,
-		with = "serde_with::rust::double_option",
-		skip_serializing_if = "Option::is_none"
-	)]
-	#[validate(length(max = 5000, message = "Justification must be at most 5000 characters"))]
-	pub justification: Option<Option<String>>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, Validate)]
-#[serde(rename_all = "camelCase")]
 #[validate(schema(function = "validate_update_has_fields", skip_on_field_errors = false))]
 pub struct UpdateQuestionBankDto {
 	#[validate(length(
@@ -79,7 +57,7 @@ pub struct UpdateQuestionBankDto {
 		message = "There must be at least 1 and at most 500 questions"
 	))]
 	#[validate(nested)]
-	pub questions: Option<Vec<UpdateQuestionInput>>,
+	pub questions: Option<Vec<QuestionInput>>,
 }
 
 fn validate_question(question: &QuestionInput) -> Result<(), ValidationError> {
@@ -104,37 +82,47 @@ fn validate_update_has_fields(dto: &UpdateQuestionBankDto) -> Result<(), Validat
 
 #[cfg(test)]
 mod tests {
-	use super::UpdateQuestionInput;
+	use super::{QuestionInput, UpdateQuestionBankDto};
 	use validator::Validate;
 
-	fn parse(json: &str) -> UpdateQuestionInput {
-		serde_json::from_str(json).expect("valid question payload")
-	}
-
-	#[test]
-	fn justification_distinguishes_missing_null_and_value() {
-		let base = r#""prompt": "P", "options": ["a", "b"]"#;
-
-		assert_eq!(parse(&format!("{{{base}}}")).justification, None);
-		assert_eq!(
-			parse(&format!(r#"{{{base}, "justification": null}}"#)).justification,
-			Some(None)
-		);
-		assert_eq!(
-			parse(&format!(r#"{{{base}, "justification": "J"}}"#)).justification,
-			Some(Some("J".to_owned()))
-		);
-	}
-
-	#[test]
-	fn justification_update_rejects_text_over_limit() {
-		let input = |len: usize| UpdateQuestionInput {
+	fn question(options: usize, answer_index: usize) -> QuestionInput {
+		QuestionInput {
 			prompt: "P".to_owned(),
-			options: vec!["a".to_owned(), "b".to_owned()],
-			justification: Some(Some("x".repeat(len))),
+			options: (0..options).map(|i| format!("opción {i}")).collect(),
+			answer_index,
+			justification: None,
+		}
+	}
+
+	fn update_with(questions: Vec<QuestionInput>) -> UpdateQuestionBankDto {
+		UpdateQuestionBankDto {
+			name: None,
+			questions: Some(questions),
+		}
+	}
+
+	#[test]
+	fn update_accepts_a_changed_correct_answer() {
+		assert!(update_with(vec![question(3, 2)]).validate().is_ok());
+	}
+
+	#[test]
+	fn update_rejects_a_correct_answer_outside_the_options() {
+		assert!(update_with(vec![question(3, 3)]).validate().is_err());
+	}
+
+	#[test]
+	fn update_rejects_questions_with_fewer_than_two_options() {
+		assert!(update_with(vec![question(1, 0)]).validate().is_err());
+	}
+
+	#[test]
+	fn update_rejects_an_empty_payload() {
+		let dto = UpdateQuestionBankDto {
+			name: None,
+			questions: None,
 		};
 
-		assert!(input(5000).validate().is_ok());
-		assert!(input(5001).validate().is_err());
+		assert!(dto.validate().is_err());
 	}
 }
