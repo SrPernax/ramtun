@@ -17,6 +17,9 @@ pub struct QuestionInput {
 	#[validate(length(min = 2, max = 5, message = "There must be between 2 and 5 options"))]
 	pub options: Vec<String>,
 	pub answer_index: usize,
+	#[serde(default)]
+	#[validate(length(max = 5000, message = "Justification must be at most 5000 characters"))]
+	pub justification: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
@@ -50,6 +53,14 @@ pub struct UpdateQuestionInput {
 
 	#[validate(length(min = 2, max = 5, message = "There must be between 2 and 5 options"))]
 	pub options: Vec<String>,
+	/// `None` keeps the current justification, `Some(None)` clears it.
+	#[serde(
+		default,
+		with = "serde_with::rust::double_option",
+		skip_serializing_if = "Option::is_none"
+	)]
+	#[validate(length(max = 5000, message = "Justification must be at most 5000 characters"))]
+	pub justification: Option<Option<String>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
@@ -89,4 +100,41 @@ fn validate_update_has_fields(dto: &UpdateQuestionBankDto) -> Result<(), Validat
 	let mut err = ValidationError::new("empty_update");
 	err.message = Some("At least one field must be provided".into());
 	Err(err)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::UpdateQuestionInput;
+	use validator::Validate;
+
+	fn parse(json: &str) -> UpdateQuestionInput {
+		serde_json::from_str(json).expect("valid question payload")
+	}
+
+	#[test]
+	fn justification_distinguishes_missing_null_and_value() {
+		let base = r#""prompt": "P", "options": ["a", "b"]"#;
+
+		assert_eq!(parse(&format!("{{{base}}}")).justification, None);
+		assert_eq!(
+			parse(&format!(r#"{{{base}, "justification": null}}"#)).justification,
+			Some(None)
+		);
+		assert_eq!(
+			parse(&format!(r#"{{{base}, "justification": "J"}}"#)).justification,
+			Some(Some("J".to_owned()))
+		);
+	}
+
+	#[test]
+	fn justification_update_rejects_text_over_limit() {
+		let input = |len: usize| UpdateQuestionInput {
+			prompt: "P".to_owned(),
+			options: vec!["a".to_owned(), "b".to_owned()],
+			justification: Some(Some("x".repeat(len))),
+		};
+
+		assert!(input(5000).validate().is_ok());
+		assert!(input(5001).validate().is_err());
+	}
 }
