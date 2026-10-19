@@ -33,7 +33,7 @@
 	.markdown-body :global(h4) {
 		margin: 0 0 0.5em;
 		font-weight: 600;
-		color: #171412;
+		color: var(--ink);
 	}
 
 	.markdown-body :global(h1) {
@@ -63,26 +63,26 @@
 	}
 
 	.markdown-body :global(a) {
-		color: #1c6c48;
+		color: var(--ok);
 		text-decoration: underline;
 	}
 
 	.markdown-body :global(blockquote) {
 		margin: 0 0 0.75em;
-		border-left: 3px solid #d7d0c8;
+		border-left: 3px solid var(--line);
 		padding-left: 1rem;
-		color: #58514a;
+		color: var(--ink-muted);
 	}
 
 	.markdown-body :global(hr) {
 		margin: 1em 0;
 		border: 0;
-		border-top: 1px solid #d7d0c8;
+		border-top: 1px solid var(--line);
 	}
 
 	.markdown-body :global(code) {
 		border-radius: 4px;
-		background: #f0f0eb;
+		background: var(--paper-muted);
 		padding: 0.125em 0.375em;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		font-size: 0.875em;
@@ -92,7 +92,7 @@
 		margin: 0 0 0.75em;
 		overflow-x: auto;
 		border-radius: 6px;
-		background: #fafaf8;
+		background: var(--paper-soft);
 		padding: 0.875rem 1rem;
 	}
 
@@ -114,12 +114,12 @@
 
 	.markdown-body :global(th),
 	.markdown-body :global(td) {
-		border: 1px solid #d7d0c8;
+		border: 1px solid var(--line);
 		padding: 0.375rem 0.625rem;
 	}
 
 	.markdown-body :global(th) {
-		background: #f0f0eb;
+		background: var(--paper-muted);
 		font-weight: 600;
 	}
 
