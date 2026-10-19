@@ -80,9 +80,10 @@
 		border-top: 1px solid var(--line);
 	}
 
+	/* El chip se tiñe con el color del texto para leerse también sobre fondos de acento (opción activa). */
 	.markdown-body :global(code) {
 		border-radius: 4px;
-		background: var(--paper-muted);
+		background: color-mix(in srgb, currentColor 12%, transparent);
 		padding: 0.125em 0.375em;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		font-size: 0.875em;
