@@ -110,7 +110,7 @@
 				{/each}
 				<div>
 					<button
-						class="btn-chip"
+						class="btn-tertiary"
 						type="button"
 						onclick={() => addOption(question)}
 						disabled={disabled || question.options.length >= MAX_OPTIONS_PER_QUESTION}
