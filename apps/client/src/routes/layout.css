@@ -154,10 +154,11 @@ body {
 			var(--paper-soft);
 	}
 
-	.panel-muted {
+	.panel-muted,
+	.stat-card {
 		@apply rounded-md;
 		box-shadow: var(--shadow-border);
-		background: linear-gradient(180deg, var(--paper-soft) 0%, var(--paper-muted) 100%);
+		background: var(--paper-muted);
 	}
 
 	.input-base {
@@ -345,13 +346,7 @@ body {
 	}
 
 	.stat-card {
-		@apply rounded-md p-4;
-		box-shadow: var(--shadow-border);
-		background: linear-gradient(
-			180deg,
-			rgba(255, 255, 255, 0.92) 0%,
-			rgba(247, 246, 242, 0.9) 100%
-		);
+		@apply p-4;
 	}
 
 	.row-hover {
