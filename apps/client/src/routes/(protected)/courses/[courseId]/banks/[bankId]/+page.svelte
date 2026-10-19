@@ -9,7 +9,9 @@
 	import { exportBankMarkdown } from "$lib/banks/utils"
 	import BreadcrumbMenu from "$lib/shared/components/BreadcrumbMenu.svelte"
 	import Markdown from "$lib/shared/components/Markdown.svelte"
-	import MarkdownEditor from "$lib/shared/components/MarkdownEditor.svelte"
+	import BankQuestionsEditor, {
+		type DraftQuestion,
+	} from "$lib/banks/components/BankQuestionsEditor.svelte"
 	import Title from "$lib/shared/components/Title.svelte"
 
 	let { data } = $props()
@@ -43,13 +45,8 @@
 		}))
 	)
 
-	type DraftQuestion = {
-		prompt: string
-		options: string[]
-		justification: string
-	}
-
 	let editing = $state(false)
+	let draftName = $state("")
 	let draft = $state<DraftQuestion[]>([])
 
 	const correctIndex = (question: { answer_index?: number; answerIndex?: number }) =>
@@ -59,9 +56,12 @@
 		const bank = bankQuery.data
 		if (!bank) return
 
+		draftName = bank.name
 		draft = bank.questions.map((question) => ({
+			key: crypto.randomUUID(),
 			prompt: question.prompt,
-			options: question.options,
+			options: [...question.options],
+			answerIndex: correctIndex(question) ?? 0,
 			justification: question.justification ?? "",
 		}))
 		editing = true
@@ -72,12 +72,29 @@
 		draft = []
 	}
 
+	// Primer problema que impediría guardar; el servidor valida lo mismo.
+	const draftProblem = $derived.by(() => {
+		if (!draftName.trim()) return "El banco necesita un nombre."
+		if (draftName.trim().length > 120) return "El nombre no puede superar los 120 caracteres."
+		if (draft.length === 0) return "El banco necesita al menos una pregunta."
+
+		for (const [index, question] of draft.entries()) {
+			if (!question.prompt.trim()) return `La pregunta ${index + 1} no tiene enunciado.`
+			if (question.options.some((option) => !option.trim()))
+				return `La pregunta ${index + 1} tiene opciones vacías.`
+		}
+
+		return null
+	})
+
 	const updateMutation = useMutation(() => ({
-		mutationFn: (questions: DraftQuestion[]) =>
+		mutationFn: () =>
 			banksService.update(data.bankId, {
-				questions: questions.map((question) => ({
+				name: draftName.trim(),
+				questions: draft.map((question) => ({
 					prompt: question.prompt,
 					options: question.options,
+					answerIndex: question.answerIndex,
 					justification: question.justification.trim() || null,
 				})),
 			}),
@@ -94,8 +111,8 @@
 	}))
 
 	const saveEdit = () => {
-		if (updateMutation.isPending) return
-		updateMutation.mutate(draft)
+		if (updateMutation.isPending || draftProblem) return
+		updateMutation.mutate()
 	}
 </script>
 
@@ -133,15 +150,24 @@
 					{bankQuery.data?.name ?? "Banco"}
 				</span>
 			</nav>
-			<div class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-				<Title size="page">{bankQuery.data?.name ?? "Banco"}</Title>
-				<p class="m-0 text-sm text-zinc-700">
-					{bankQuery.data?.questions.length ?? 0} preguntas
-					{#if editing}
-						- modo edición
-					{/if}
-				</p>
-			</div>
+			{#if editing}
+				<label class="grid gap-1.5">
+					<span class="text-sm text-zinc-800">Nombre del banco</span>
+					<input
+						class="input-base w-full sm:w-96"
+						bind:value={draftName}
+						maxlength="120"
+						disabled={updateMutation.isPending}
+					/>
+				</label>
+			{:else}
+				<div class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+					<Title size="page">{bankQuery.data?.name ?? "Banco"}</Title>
+					<p class="m-0 text-sm text-zinc-700">
+						{bankQuery.data?.questions.length ?? 0} preguntas
+					</p>
+				</div>
+			{/if}
 		</div>
 		<div class="flex flex-wrap items-center gap-1.5">
 			{#if editing}
@@ -158,7 +184,8 @@
 					class="btn-primary flex items-center gap-1.5"
 					type="button"
 					onclick={saveEdit}
-					disabled={updateMutation.isPending}
+					disabled={updateMutation.isPending || !!draftProblem}
+					title={draftProblem ?? undefined}
 				>
 					<Save size={16} aria-hidden="true" />
 					{updateMutation.isPending ? "Guardando..." : "Guardar"}
@@ -193,52 +220,10 @@
 			</p>
 		{:else if bankQuery.data}
 			{#if editing}
-				<div class="grid gap-4">
-					{#each draft as question, index (index)}
-						<article class="panel-surface p-4 sm:p-5">
-							<div class="mb-4 flex items-center justify-between gap-2">
-								<h4 class="m-0 text-base font-medium text-black">
-									Pregunta {index + 1}
-								</h4>
-							</div>
-
-							<label class="grid gap-1.5">
-								<span class="text-sm text-zinc-800">Enunciado (Markdown)</span>
-								<MarkdownEditor bind:value={question.prompt} />
-							</label>
-
-							<div class="mt-4 grid gap-2">
-								{#each question.options as _, optionIndex (optionIndex)}
-									{@const correct = correctIndex(bankQuery.data.questions[index])}
-									<div class="grid gap-1.5">
-										<label class="grid gap-1.5">
-											<span class="text-sm text-zinc-800">
-												Opción {optionIndex + 1}
-												{#if optionIndex === correct}
-													<span class="text-emerald-700">
-														(correcta)</span
-													>
-												{/if}
-											</span>
-											<input
-												class="input-base"
-												bind:value={question.options[optionIndex]}
-											/>
-										</label>
-									</div>
-								{/each}
-							</div>
-
-							<label class="mt-4 grid gap-1.5">
-								<span class="text-sm text-zinc-800">Justificación (opcional)</span>
-								<MarkdownEditor
-									bind:value={question.justification}
-									placeholder="Explica por qué la respuesta correcta lo es..."
-								/>
-							</label>
-						</article>
-					{/each}
-				</div>
+				<BankQuestionsEditor bind:questions={draft} disabled={updateMutation.isPending} />
+				{#if draftProblem}
+					<p class="mt-3 mb-0 text-sm text-red-700" role="status">{draftProblem}</p>
+				{/if}
 			{:else}
 				<div class="grid gap-4">
 					{#each bankQuery.data.questions as question, index (question.id)}

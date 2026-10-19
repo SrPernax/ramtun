@@ -74,9 +74,14 @@ export type CreateQuestionBankInput = {
 
 export type UpdateQuestionBankInput = {
 	name?: string
-	questions: {
+	questions?: {
 		prompt: string
 		options: string[]
+		answerIndex: number
 		justification?: string | null
 	}[]
 }
+
+export const MAX_QUESTIONS_PER_BANK = 500
+export const MIN_OPTIONS_PER_QUESTION = 2
+export const MAX_OPTIONS_PER_QUESTION = 5
