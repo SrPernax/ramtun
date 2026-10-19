@@ -176,6 +176,11 @@ body {
 		border-color: color-mix(in srgb, var(--ink-muted) 45%, white);
 	}
 
+	.input-base:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
+
 	.input-base:focus-visible {
 		border-color: var(--accent);
 		box-shadow:

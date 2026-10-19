@@ -37,6 +37,21 @@ impl Entity for Quiz {
 	}
 }
 
+impl Quiz {
+	/// Top score a student can reach: one point per question in traditional
+	/// quizzes, the highest certainty reward per question otherwise.
+	pub fn compute_max_score(
+		kind: QuizKind,
+		question_count: i16,
+		certainty_table: Option<&CertaintyTable>,
+	) -> i16 {
+		match (kind, certainty_table) {
+			(QuizKind::Certainty, Some(table)) => table.high.correct * question_count,
+			_ => question_count,
+		}
+	}
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Type, Default, PartialEq, Eq, Copy)]
 #[sqlx(type_name = "quiz_kind", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
@@ -47,14 +62,14 @@ pub enum QuizKind {
 	Certainty,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize, Type, PartialEq, Eq)]
 #[sqlx(type_name = "certainty_score")]
 pub struct CertaintyScore {
 	pub correct: i16,
 	pub incorrect: i16,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize, Type, PartialEq, Eq)]
 #[sqlx(type_name = "certainty_table")]
 pub struct CertaintyTable {
 	pub low: CertaintyScore,

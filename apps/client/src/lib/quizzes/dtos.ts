@@ -76,6 +76,18 @@ export const createQuizDTOSchema = v.object({
 export type CreateQuizDTOSchema = typeof createQuizDTOSchema
 export type CreateQuizDTO = v.InferOutput<typeof createQuizDTOSchema>
 
+// Update Quiz DTO ------------------------------------------------------
+
+/** Solo viajan los campos que cambiaron: el servidor bloquea los estructurales si ya hay intentos. */
+export type UpdateQuizDTO = {
+	title?: string
+	startsAt?: string
+	attemptDurationMinutes?: number
+	questionCount?: number
+	certaintyConfig?: CertaintyTableDTO
+	resultsMultipleViews?: boolean
+}
+
 // Join Quiz DTO ------------------------------------------------------
 
 export const joinCodeDTOSchema = v.object({
