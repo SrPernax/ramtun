@@ -14,6 +14,7 @@
 		disconnectAttemptsSocket,
 	} from "$lib/shared/socket/attempts.socket"
 	import { attemptsService } from "$lib/attempts/service"
+	import ThemeToggle from "$lib/shared/components/ThemeToggle.svelte"
 
 	let { data, children }: LayoutProps = $props()
 
@@ -121,6 +122,7 @@
 				</p>
 				<p class="m-0 text-xs text-zinc-600">{authStore.user?.role.toDisplay()}</p>
 			</div>
+			<ThemeToggle />
 			<button
 				class="btn-close size-11 cursor-pointer"
 				type="button"

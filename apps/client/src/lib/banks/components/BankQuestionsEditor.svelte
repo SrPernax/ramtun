@@ -184,7 +184,7 @@
 						{#each question.options as _, optionIndex (optionIndex)}
 							<div class="flex items-center gap-2">
 								<input
-									class="shrink-0"
+									class="[--check:var(--ok)]"
 									type="radio"
 									name={`correct-${question.key}`}
 									checked={question.answerIndex === optionIndex}

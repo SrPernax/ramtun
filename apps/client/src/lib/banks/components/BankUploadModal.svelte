@@ -128,7 +128,7 @@ La capital de Francia es París desde hace siglos.
 
 {#if open}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-(--scrim) p-4"
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
@@ -223,7 +223,7 @@ La capital de Francia es París desde hace siglos.
 
 {#if showFormatModal}
 	<div
-		class="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-4"
+		class="fixed inset-0 z-60 flex items-center justify-center bg-(--scrim) p-4"
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
